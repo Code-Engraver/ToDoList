@@ -1,0 +1,35 @@
+.div_center {
+    position:absolute;
+    top:0;right:0;bottom:0;left:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    display:-webkit-flex;
+    -webkit-justify-content:center;
+}
+.card_detail {
+    width: 70%;
+    background: tan;
+}
+.label_detail {
+    font-size: 200%;
+    font-weight: bold;
+}
+.span_warning {
+    color: darkred;
+    font-weight: bold;
+}
+.progress_detail {
+    margin-top: 20px;
+}
+.li_span_detail {
+    font-size: 120%;
+}
+.is_done {
+    color: lightgray;
+    text-decoration: double line-through darkred;
+}
+.detail-margin {
+    margin-top: 30px;
+}

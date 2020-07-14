@@ -1,0 +1,171 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Simple Todo</title>
+    <link rel="stylesheet" href="{% static 'my_to_do_app/bootstrap/css/bootstrap.min.css' %}"/>
+    <script src="{% static 'my_to_do_app/jquery/jquery-3.5.1.min.js' %}"></script>
+    <script src="{% static 'my_to_do_app/bootstrap/js/bootstrap.min.js' %}"></script>
+
+    <link rel="stylesheet" href="{% static 'my_to_do_app/css/index.css' %}" />
+
+    <script>
+        function validateForm() {
+            let input_el = jQuery("#write_your_todo")
+            let todo = input_el.val();
+            if (todo.length <= 0 || todo.length > 100) {
+                jQuery("#invalidate").removeClass("d-none");
+
+                input_el.val("");
+                input_el.focus();
+                return false;
+            }
+            return true;
+        }
+
+        function validateUpdateForm(pk) {
+            let input_el = jQuery(`#editModal${pk} form input`);
+            let todo = input_el.val();
+            if (todo.length <= 0 || todo.length > 100) {
+                jQuery("#invalidateUpdate").removeClass("d-none");
+
+                input_el.val("");
+                input_el.focus();
+                return false;
+            }
+            return true;
+        }
+
+        jQuery(document).ready(function() {
+            jQuery("#write_your_todo").keydown(function(e) {
+                jQuery("#invalidate").addClass("d-none");
+            });
+            jQuery("#write_your_todo").keyup(function(e) {
+                let text = jQuery(this).val();
+                if (text.length > 100) {
+                    jQuery("#invalidate").removeClass("d-none");
+                    jQuery("#write_your_todo").val(text.slice(0, 100));
+                    return;
+                }
+                jQuery("#progress").css("width", text.length + "%");
+                jQuery("#progress").html(text.length + "/100");
+            });
+
+            jQuery("[id^=done]").click(function(){
+                let id = jQuery(this).attr("id").replace("done_","");
+                let form = jQuery(`
+                    <form action="/doneTodo/" method="post">{% csrf_token %}
+                        <input type="hidden" value=${id} name="id"/>
+                    </form>
+               `)
+                jQuery('body').append(form);
+                form.submit();
+            });
+
+            jQuery("[id^=delete]").click(function(){
+                let do_delete = confirm("Delete it?")
+                if (!do_delete) {
+                    return
+                }
+                let id = jQuery(this).attr("id").replace("delete_","");
+                let form = jQuery(`
+                    <form action="/deleteTodo/" method="post">{% csrf_token %}
+                        <input type="hidden" value=${id} name="id"/>
+                    </form>
+                `)
+                jQuery('body').append(form);
+                form.submit();
+            });
+            jQuery("#edit_your_todo").keydown(function(e) {
+                jQuery("#invalidateUpdate").addClass("d-none");
+            });
+        });
+    </script>
+</head>
+<body>
+<div class="div_center">
+    <div class="card card_detail">
+        <div class="card-header">
+            <form action="/createTodo/" method="post" onsubmit="return validateForm()">{% csrf_token %}
+                <div class="form-group">
+                    <label for="write_your_todo" class="label_detail">WRITE YOUR TODO</label>
+                    <div class="row">
+                        <input type="text" class="form-control col-10" id="write_your_todo" name="content" placeholder="Write Your Todo...">
+                        <button type="submit" class="btn btn-primary col-2">Memo</button>
+                    </div>
+                    <div>
+                        <span class="span_warning d-none" id="invalidate">The length of toto is 0 to 100 characters.</span>
+                    </div>
+                    <div class="progress progress_detail">
+                        <div id="progress" class="progress-bar progress-bar-striped bg-success progress-bar-animated"
+                             role="progressbar" aria-valuemin="0" aria-valuemax="100" style="width: 0%">0/100</div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <ul class="list-group list-group-flush">
+            {% for todo in todo_list %}
+                {% if todo.is_done %}
+                    <li class="list-group-item">
+                        <span class="li_span_detail is_done">{{ todo.content }}</span>
+                        <div class="btn-group-sm float-right" role="group">
+                            <button type="button" class="btn btn-success" id="done_{{ todo.id }}">Done</button>
+                            <button type="button" class="btn btn-danger" id="delete_{{ todo.id }}">Delete</button>
+                        </div>
+                    </li>
+                {% else %}
+                    <li class="list-group-item">
+                        <span class="li_span_detail">{{ todo.content }}</span>
+                        <div class="btn-group-sm float-right" role="group">
+                            <button type="button" class="btn btn-success" id="done_{{ todo.id }}">Done</button>
+                            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#editModal{{ todo.id }}">Edit</button>
+                            <button type="button" class="btn btn-danger" id="delete_{{ todo.id }}">Delete</button>
+                        </div>
+                    </li>
+                    <div class="modal fade" id="editModal{{ todo.id }}" tabindex="-1" role="dialog" aria-label="editModal">
+                        <div class="modal-dialog modal-dialog-centered" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">EDIT TODO</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <form action="/editTodo/" method="post" onsubmit="return validateUpdateForm({{ todo.id }})">{% csrf_token %}
+                                        <div class="form-group">
+                                            <input type="hidden" name="id" value="{{ todo.id }}"/>
+                                            <label for="edit_your_todo">Edit Your Todo</label>
+                                            <input type="text" class="form-control" id="edit_your_todo" name="content" value="{{ todo.content }}">
+                                        </div>
+                                        <div>
+                                            <span class="span_warning d-none" id="invalidateUpdate">The length of toto is 0 to 100 characters.</span>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary float-right">Edit</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </ul>
+        <ul class="pagination justify-content-center detail-margin">
+            {% if todo_list.has_previous %}
+                <li class="page-item"><a class="page-link" href="/todolist/{{ todo_list.previous_page_number }}">Previous</a></li>
+            {% endif %}
+            {% for number in paginator_range %}
+                <li class="page-item {% if todo_list.number == number %}active{% endif %}">
+                    <a class="page-link" href="/todolist/{{ number }}">{{ number }}</a>
+                </li>
+            {% endfor %}
+            {% if todo_list.has_next %}
+                <li class="page-item"><a class="page-link" href="/todolist/{{ todo_list.next_page_number }}">Next</a></li>
+            {% endif %}
+        </ul>
+    </div>
+</div>
+</body>
+</html>
