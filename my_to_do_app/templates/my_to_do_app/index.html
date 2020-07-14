@@ -10,85 +10,13 @@
     <script src="{% static 'my_to_do_app/bootstrap/js/bootstrap.min.js' %}"></script>
 
     <link rel="stylesheet" href="{% static 'my_to_do_app/css/index.css' %}" />
-
-    <script>
-        function validateForm() {
-            let input_el = jQuery("#write_your_todo")
-            let todo = input_el.val();
-            if (todo.length <= 0 || todo.length > 100) {
-                jQuery("#invalidate").removeClass("d-none");
-
-                input_el.val("");
-                input_el.focus();
-                return false;
-            }
-            return true;
-        }
-
-        function validateUpdateForm(pk) {
-            let input_el = jQuery(`#editModal${pk} form input`);
-            let todo = input_el.val();
-            if (todo.length <= 0 || todo.length > 100) {
-                jQuery("#invalidateUpdate").removeClass("d-none");
-
-                input_el.val("");
-                input_el.focus();
-                return false;
-            }
-            return true;
-        }
-
-        jQuery(document).ready(function() {
-            jQuery("#write_your_todo").keydown(function(e) {
-                jQuery("#invalidate").addClass("d-none");
-            });
-            jQuery("#write_your_todo").keyup(function(e) {
-                let text = jQuery(this).val();
-                if (text.length > 100) {
-                    jQuery("#invalidate").removeClass("d-none");
-                    jQuery("#write_your_todo").val(text.slice(0, 100));
-                    return;
-                }
-                jQuery("#progress").css("width", text.length + "%");
-                jQuery("#progress").html(text.length + "/100");
-            });
-
-            jQuery("[id^=done]").click(function(){
-                let id = jQuery(this).attr("id").replace("done_","");
-                let form = jQuery(`
-                    <form action="/doneTodo/" method="post">{% csrf_token %}
-                        <input type="hidden" value=${id} name="id"/>
-                    </form>
-               `)
-                jQuery('body').append(form);
-                form.submit();
-            });
-
-            jQuery("[id^=delete]").click(function(){
-                let do_delete = confirm("Delete it?")
-                if (!do_delete) {
-                    return
-                }
-                let id = jQuery(this).attr("id").replace("delete_","");
-                let form = jQuery(`
-                    <form action="/deleteTodo/" method="post">{% csrf_token %}
-                        <input type="hidden" value=${id} name="id"/>
-                    </form>
-                `)
-                jQuery('body').append(form);
-                form.submit();
-            });
-            jQuery("#edit_your_todo").keydown(function(e) {
-                jQuery("#invalidateUpdate").addClass("d-none");
-            });
-        });
-    </script>
+    <script src="{% static 'my_to_do_app/js/index.js' %}"></script>
 </head>
 <body>
 <div class="div_center">
     <div class="card card_detail">
         <div class="card-header">
-            <form action="/createTodo/" method="post" onsubmit="return validateForm()">{% csrf_token %}
+            <form action="{% url 'createTodo' %}" method="post" onsubmit="return validateForm()">{% csrf_token %}
                 <div class="form-group">
                     <label for="write_your_todo" class="label_detail">WRITE YOUR TODO</label>
                     <div class="row">
@@ -100,7 +28,7 @@
                     </div>
                     <div class="progress progress_detail">
                         <div id="progress" class="progress-bar progress-bar-striped bg-success progress-bar-animated"
-                             role="progressbar" aria-valuemin="0" aria-valuemax="100" style="width: 0%">0/100</div>
+                             role="progressbar" aria-valuemin="0" aria-valuemax="100" style="width: 0">0/100</div>
                     </div>
                 </div>
             </form>
@@ -120,11 +48,11 @@
                         <span class="li_span_detail">{{ todo.content }}</span>
                         <div class="btn-group-sm float-right" role="group">
                             <button type="button" class="btn btn-success" id="done_{{ todo.id }}">Done</button>
-                            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#editModal{{ todo.id }}">Edit</button>
+                            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#editModal_{{ todo.id }}">Edit</button>
                             <button type="button" class="btn btn-danger" id="delete_{{ todo.id }}">Delete</button>
                         </div>
                     </li>
-                    <div class="modal fade" id="editModal{{ todo.id }}" tabindex="-1" role="dialog" aria-label="editModal">
+                    <div class="modal fade" id="editModal_{{ todo.id }}" tabindex="-1" role="dialog" aria-label="editModal">
                         <div class="modal-dialog modal-dialog-centered" role="document">
                             <div class="modal-content">
                                 <div class="modal-header">
@@ -134,14 +62,14 @@
                                     </button>
                                 </div>
                                 <div class="modal-body">
-                                    <form action="/editTodo/" method="post" onsubmit="return validateUpdateForm({{ todo.id }})">{% csrf_token %}
+                                    <form action="{% url 'editTodo' %}" method="post" onsubmit="return validateUpdateForm({{ todo.id }})">{% csrf_token %}
                                         <div class="form-group">
                                             <input type="hidden" name="id" value="{{ todo.id }}"/>
-                                            <label for="edit_your_todo">Edit Your Todo</label>
-                                            <input type="text" class="form-control" id="edit_your_todo" name="content" value="{{ todo.content }}">
+                                            <label for="edit_your_todo_{{ todo.id }}">Edit Your Todo</label>
+                                            <input type="text" class="form-control" id="edit_your_todo_{{ todo.id }}" name="content" value="{{ todo.content }}">
                                         </div>
                                         <div>
-                                            <span class="span_warning d-none" id="invalidateUpdate">The length of toto is 0 to 100 characters.</span>
+                                            <span class="span_warning d-none" id="invalidateUpdate_{{ todo.id }}">The length of toto is 0 to 100 characters.</span>
                                         </div>
                                         <button type="submit" class="btn btn-primary float-right">Edit</button>
                                     </form>
