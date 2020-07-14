@@ -62,9 +62,8 @@
                                     </button>
                                 </div>
                                 <div class="modal-body">
-                                    <form action="{% url 'editTodo' %}" method="post" onsubmit="return validateUpdateForm({{ todo.id }})">{% csrf_token %}
+                                    <form action="{% url 'editTodo' todo.id %}" method="post" onsubmit="return validateUpdateForm({{ todo.id }})">{% csrf_token %}
                                         <div class="form-group">
-                                            <input type="hidden" name="id" value="{{ todo.id }}"/>
                                             <label for="edit_your_todo_{{ todo.id }}">Edit Your Todo</label>
                                             <input type="text" class="form-control" id="edit_your_todo_{{ todo.id }}" name="content" value="{{ todo.content }}">
                                         </div>
@@ -81,16 +80,16 @@
             {% endfor %}
         </ul>
         <ul class="pagination justify-content-center detail-margin">
-            {% if todo_list.has_previous %}
-                <li class="page-item"><a class="page-link" href="/todolist/{{ todo_list.previous_page_number }}">Previous</a></li>
+            {% if page_obj.has_previous %}
+                <li class="page-item"><a class="page-link" href="/todolist/{{ page_obj.previous_page_number }}">Previous</a></li>
             {% endif %}
             {% for number in paginator_range %}
-                <li class="page-item {% if todo_list.number == number %}active{% endif %}">
+                <li class="page-item {% if page_obj.number == number %}active{% endif %}">
                     <a class="page-link" href="/todolist/{{ number }}">{{ number }}</a>
                 </li>
             {% endfor %}
-            {% if todo_list.has_next %}
-                <li class="page-item"><a class="page-link" href="/todolist/{{ todo_list.next_page_number }}">Next</a></li>
+            {% if page_obj.has_next %}
+                <li class="page-item"><a class="page-link" href="/todolist/{{ page_obj.next_page_number }}">Next</a></li>
             {% endif %}
         </ul>
     </div>

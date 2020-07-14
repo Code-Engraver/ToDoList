@@ -68,9 +68,8 @@ jQuery(document).ready(function() {
 
     jQuery("[id^=done]").click(function(){
         let form = jQuery(`
-            <form action="/doneTodo/" method="post">
+            <form action="/doneTodo/${get_id(jQuery(this).attr("id"))}/" method="post">
                 <input type="hidden" value="${csrftoken}" name="csrfmiddlewaretoken">
-                <input type="hidden" value=${get_id(jQuery(this).attr("id"))} name="id"/>
             </form>
         `)
         jQuery('body').append(form);
@@ -82,9 +81,8 @@ jQuery(document).ready(function() {
             return
         }
         let form = jQuery(`
-            <form action="/deleteTodo/" method="post">
+            <form action="/deleteTodo/${get_id(jQuery(this).attr("id"))}/" method="post">
                 <input type="hidden" value="${csrftoken}" name="csrfmiddlewaretoken">
-                <input type="hidden" value=${get_id(jQuery(this).attr("id"))} name="id"/>
             </form>
         `)
         jQuery('body').append(form);

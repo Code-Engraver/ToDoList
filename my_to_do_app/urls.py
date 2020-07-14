@@ -2,10 +2,10 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('', views.index, name='index'),
-    path('todolist/<int:page>/', views.todolist, name='todolist'),
-    path('createTodo/', views.create_todo, name='createTodo'),
-    path('doneTodo/', views.done_todo, name='doneTodo'),
-    path('deleteTodo/', views.delete_todo, name='deleteTodo'),
-    path('editTodo/', views.edit_todo, name='editTodo')
+    path('', views.Index.as_view(), name='index'),
+    path('todolist/<int:page>/', views.TodoList.as_view(), name='todolist'),
+    path('createTodo/', views.CreateTodo.as_view(), name='createTodo'),
+    path('doneTodo/<int:pk>/', views.DoneTodo.as_view(), name='doneTodo'),
+    path('deleteTodo/<int:pk>/', views.DeleteTodo.as_view(), name='deleteTodo'),
+    path('editTodo/<int:pk>/', views.EditTodo.as_view(), name='editTodo')
 ]
